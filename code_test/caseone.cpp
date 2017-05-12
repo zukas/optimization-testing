@@ -22,12 +22,10 @@ const std::vector<std::shared_ptr<DomNode> >& DomNode::children() const {
 
 void DomNode::move(const Pos& position) {
   _nextPosition = position;
-  _needUpdate = true;
 }
 
 void DomNode::resize(const Size& size) {
   _nextSize = size;
-  _needUpdate = true;
 }
 
 Pos DomNode::position() const {
@@ -39,7 +37,7 @@ Size DomNode::size() const {
 }
 
 void DomNode::performUpdates() {
-  bool do_update = _needUpdate;
+  bool do_update = _position != _nextPosition || _size != _nextSize;
   if (!do_update) {
     for (const auto& c : _children) {
       do_update |= c->needUpdate();
@@ -50,7 +48,6 @@ void DomNode::performUpdates() {
 
   if (do_update) {
     update();
-    _needUpdate = false;
   }
 }
 
@@ -75,5 +72,5 @@ void DomNode::update() {
 }
 
 bool DomNode::needUpdate() const {
-  return _needUpdate;
+  return _position != _nextPosition || _size != _nextSize;
 }

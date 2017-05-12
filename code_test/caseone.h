@@ -59,7 +59,6 @@ class DomNode {
   Size _size{0.0, 0.0};
   Size _prevSize{0.0, 0.0};
   Size _nextSize{0.0, 0.0};
-  bool _needUpdate{false};
   std::string _tag;
   std::string _id;
   DomNode* _parent{nullptr};
