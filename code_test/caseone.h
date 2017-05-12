@@ -2,7 +2,7 @@
 #define CASEONE_H
 
 #include <string>
-#include <list>
+#include <vector>
 #include <memory>
 
 struct Pos {
@@ -37,7 +37,7 @@ class DomNode {
 
   void addChild(std::shared_ptr<DomNode> child);
   void remChild(std::shared_ptr<DomNode> child);
-  const std::list<std::shared_ptr<DomNode>>& children() const;
+  const std::vector<std::shared_ptr<DomNode>>& children() const;
 
   void move(const Pos& position);
   void resize(const Size& size);
@@ -63,7 +63,7 @@ class DomNode {
   bool _needUpdate{false};
 
   DomNode* _parent{nullptr};
-  std::list<std::shared_ptr<DomNode>> _children;
+  std::vector<std::shared_ptr<DomNode>> _children;
 };
 
 #endif  // CASEONE_H

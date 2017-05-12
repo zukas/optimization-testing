@@ -1,4 +1,5 @@
 #include "caseone.h"
+#include <algorithm>
 
 DomNode::DomNode(DomNode* parent) : _parent(parent) {}
 
@@ -9,10 +10,13 @@ void DomNode::addChild(std::shared_ptr<DomNode> child) {
 }
 
 void DomNode::remChild(std::shared_ptr<DomNode> child) {
-  _children.remove(child);
+  auto begin = std::begin(_children), end = std::end(_children),
+       it = std::find(begin, end, child);
+  if (it != end)
+    _children.erase(it);
 }
 
-const std::list<std::shared_ptr<DomNode> >& DomNode::children() const {
+const std::vector<std::shared_ptr<DomNode> >& DomNode::children() const {
   return _children;
 }
 
