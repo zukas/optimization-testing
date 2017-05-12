@@ -6,53 +6,37 @@
 #include <memory>
 
 struct Pos {
-  double x;
-  double y;
-  bool operator==(const Pos& other) const {
-    return x == other.x && y == other.y;
-  }
-  bool operator!=(const Pos& other) const {
-    return x != other.x || y == other.y;
-  }
-  friend Pos operator+(const Pos& a, const Pos& b) {
-    return Pos{a.x + b.x, a.y + b.y};
-  }
+  float x;
+  float y;
 };
 
 struct Size {
-  double w;
-  double h;
-  bool operator==(const Size& other) const {
-    return w == other.w && h == other.h;
-  }
-  bool operator!=(const Size& other) const {
-    return w != other.w || h == other.h;
-  }
+  float w;
+  float h;
+};
+
+struct Geom {
+  Pos position;
+  Size size;
 };
 
 class DomNode {
  public:
-  DomNode(DomNode* parent = nullptr);
-  virtual ~DomNode();
+  DomNode(Geom* geom, DomNode* parent = nullptr);
 
   void addChild(std::shared_ptr<DomNode> child);
   void remChild(std::shared_ptr<DomNode> child);
   const std::vector<std::shared_ptr<DomNode>>& children() const;
 
-  void move(const Pos& position);
-  void resize(const Size& size);
+  const Geom& geometry() const;
 
-  Pos position() const;
-  Size size() const;
+  static void move(Geom* geometries, int32_t count, Pos pos);
 
  private:
+  Geom* _geom{nullptr};
   std::vector<std::shared_ptr<DomNode>> _children;
-  Pos _position{0.0, 0.0};
-  Pos _prevPositon{0.0, 0.0};
-  Size _size{0.0, 0.0};
-  Size _prevSize{0.0, 0.0};
-  std::string _tag;
   std::string _id;
+  std::string _tag;
   DomNode* _parent{nullptr};
 };
 
