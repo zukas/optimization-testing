@@ -26,7 +26,6 @@ int main() {
     for (int y = 0; y < iteration_y; y++) {
       Pos p{static_cast<double>(x), static_cast<double>(y)};
       root->move(p);
-      root->performUpdates();
     }
   }
 

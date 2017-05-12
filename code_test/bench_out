@@ -66,3 +66,20 @@ Performance counter stats for './code_test_4' (10 runs):
 
       9.080109741 seconds time elapsed                                          ( +-  0.16% )
 
+Performance counter stats for './code_test_5' (10 runs):
+
+      5986.246423      task-clock (msec)         #    1.000 CPUs utilized            ( +-  0.20% )
+                6      context-switches          #    0.001 K/sec                    ( +- 13.35% )
+                0      cpu-migrations            #    0.000 K/sec
+              323      page-faults               #    0.054 K/sec                    ( +-  0.17% )
+   23,482,419,008      cycles                    #    3.923 GHz                      ( +-  0.19% )  (49.99%)
+   20,352,390,287      instructions              #    0.87  insn per cycle           ( +-  0.03% )  (62.50%)
+    2,144,199,770      branches                  #  358.188 M/sec                    ( +-  0.02% )  (62.52%)
+       14,812,023      branch-misses             #    0.69% of all branches          ( +-  0.01% )  (62.54%)
+   10,714,098,753      L1-dcache-loads           # 1789.786 M/sec                    ( +-  0.01% )  (62.39%)
+    2,634,151,209      L1-dcache-load-misses     #   24.59% of all L1-dcache hits    ( +-  0.03% )  (25.00%)
+    1,290,404,924      LLC-loads                 #  215.562 M/sec                    ( +-  0.20% )  (25.01%)
+           70,448      LLC-load-misses           #    0.01% of all LL-cache hits     ( +- 10.13% )  (37.49%)
+
+      5.987064182 seconds time elapsed                                          ( +-  0.20% )
+
