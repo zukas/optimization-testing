@@ -52,8 +52,7 @@ class DomNode {
   virtual bool needUpdate() const;
 
  private:
-  std::string _tag;
-  std::string _id;
+  std::vector<std::shared_ptr<DomNode>> _children;
   Pos _position{0.0, 0.0};
   Pos _prevPositon{0.0, 0.0};
   Pos _nextPosition{0.0, 0.0};
@@ -61,9 +60,9 @@ class DomNode {
   Size _prevSize{0.0, 0.0};
   Size _nextSize{0.0, 0.0};
   bool _needUpdate{false};
-
+  std::string _tag;
+  std::string _id;
   DomNode* _parent{nullptr};
-  std::vector<std::shared_ptr<DomNode>> _children;
 };
 
 #endif  // CASEONE_H

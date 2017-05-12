@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(code_test_2)
+project(code_test_3)
 
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer" )
 
