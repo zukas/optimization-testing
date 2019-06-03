@@ -1,0 +1,22 @@
+#/bin/bash
+
+echo "Test1"
+./test1/sc_test1 --benchmark_out=test1.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test2"
+./test2/sc_test2 --benchmark_out=test2.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test3"
+./test3/sc_test3 --benchmark_out=test3.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test4"
+./test4/sc_test4 --benchmark_out=test4.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test5"
+./test5/sc_test5 --benchmark_out=test5.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test6"
+./test6/sc_test6 --benchmark_out=test6.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true
+
+echo "Test7"
+./test7/sc_test7 --benchmark_out=test7.out --benchmark_out_format=csv --benchmark_repetitions=5 --benchmark_report_aggregates_only=true

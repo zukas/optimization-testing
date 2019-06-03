@@ -1,0 +1,36 @@
+#/bin/bash
+
+echo "Test1"
+cd ./test1
+perf record -g ./sc_test1
+cd ..
+
+echo "Test2"
+cd ./test2
+perf record -g ./sc_test2
+cd ..
+
+echo "Test3"
+cd ./test3
+perf record -g ./sc_test3
+cd ..
+
+echo "Test4"
+cd ./test4
+perf record -g ./sc_test4
+cd ..
+
+echo "Test5"
+cd ./test5
+perf record -g ./sc_test5
+cd ..
+
+echo "Test6"
+cd ./test6
+perf record -g ./sc_test6
+cd ..
+
+echo "Test7"
+cd ./test7
+perf record -g ./sc_test7
+cd ..
