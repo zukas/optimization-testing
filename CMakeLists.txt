@@ -8,6 +8,7 @@ add_subdirectory(benchmark)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fno-exceptions -fno-rtti -std=c++14")
+#-fsanitize=address
 
 add_subdirectory(concepts)
 add_subdirectory(devirtualize)
@@ -16,3 +17,5 @@ add_subdirectory(geometry)
 add_subdirectory(bitop)
 add_subdirectory(std)
 add_subdirectory(standard_containers)
+add_subdirectory(SoA)
+add_subdirectory(SIMD)

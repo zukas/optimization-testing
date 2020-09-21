@@ -7,30 +7,43 @@
 class dataFix : public benchmark::Fixture {
 public:
   void SetUp(const ::benchmark::State &state) {
-    int64_t elem = state.range(0);
-    int64_t bits = state.range(1);
+    count = state.range(0);
+    int64_t elem = state.range(1);
+    int64_t bits = state.range(2);
+
+    data = static_cast<uint64_t *>(malloc(sizeof(uint64_t) * count));
+    memset(data, 0, sizeof(sizeof(uint64_t) * count));
     data[elem] = bits;
   }
 
-  void TearDown(const ::benchmark::State &) { memset(data, 0, sizeof(data)); }
+  void TearDown(const ::benchmark::State &) {
+    free(data);
+    data = nullptr;
+  }
 
 protected:
-  uint64_t data[64]{0};
+  int64_t count{0};
+  uint64_t *data{nullptr};
+  int32_t elem;
+  int32_t idx;
 };
 
 BENCHMARK_DEFINE_F(dataFix, bitfind)(benchmark::State &state) {
   for (auto _ : state) {
-    int index = 0;
     for (int i = 0; i < 64; ++i) {
       const uint64_t test = (1u << i);
       const uint64_t mask = (data[0] & test);
       const bool val = mask == test;
       if (val) {
-        benchmark::DoNotOptimize(index = i);
-        benchmark::ClobberMemory();
+        idx = i;
         break;
       }
     }
+    elem = 0;
+
+    benchmark::DoNotOptimize(elem);
+    benchmark::DoNotOptimize(idx);
+    benchmark::ClobberMemory();
   }
 }
 
@@ -47,15 +60,17 @@ BENCHMARK_DEFINE_F(dataFix, loopfind)(benchmark::State &state) {
   benchmark::ClobberMemory();
 
   for (auto _ : state) {
-    int index = 0;
     for (int i = 0; i < 64; ++i) {
       const bool val = states[i];
       if (val) {
-        benchmark::DoNotOptimize(index = i);
-        benchmark::ClobberMemory();
+        idx = i;
         break;
       }
     }
+    elem = 0;
+    benchmark::DoNotOptimize(elem);
+    benchmark::DoNotOptimize(idx);
+    benchmark::ClobberMemory();
   }
 }
 
@@ -64,8 +79,10 @@ BENCHMARK_DEFINE_F(dataFix, logfind)(benchmark::State &state) {
     const uint64_t x = data[0];
     benchmark::DoNotOptimize(x);
     benchmark::ClobberMemory();
-    int index = std::log2(x & -x);
-    benchmark::DoNotOptimize(index);
+    idx = std::log2(x & -x);
+    elem = 0;
+    benchmark::DoNotOptimize(elem);
+    benchmark::DoNotOptimize(idx);
     benchmark::ClobberMemory();
   }
 }
@@ -75,101 +92,126 @@ BENCHMARK_DEFINE_F(dataFix, ffsfind)(benchmark::State &state) {
     const uint64_t x = data[0];
     benchmark::DoNotOptimize(x);
     benchmark::ClobberMemory();
-    int index = ffsl(x) - 1;
-    benchmark::DoNotOptimize(index);
+    idx = ffsl(x) - 1;
+    elem = 0;
+    benchmark::DoNotOptimize(elem);
+    benchmark::DoNotOptimize(idx);
     benchmark::ClobberMemory();
   }
 }
 
 BENCHMARK_DEFINE_F(dataFix, ffsarrayfind)(benchmark::State &state) {
   for (auto _ : state) {
-    int index = 0;
-    int elem = -1;
-    for (int i = 0; i < 64; ++i) {
-      index = ffsl(data[i]);
+    for (int i = 0; i < count; ++i) {
+      int index = __builtin_ffsl(static_cast<int64_t>(data[i]));
       if (index != 0) {
-        benchmark::DoNotOptimize(elem = i);
-        benchmark::DoNotOptimize(--index);
-        benchmark::ClobberMemory();
+        elem = i;
+        idx = index - 1;
         break;
       }
-    };
-  }
-}
-
-BENCHMARK_DEFINE_F(dataFix, DeBruijnfind)(benchmark::State &state) {
-
-  constexpr const int MultiplyDeBruijnBitPosition[32] = {
-      0,  1,  28, 2,  29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4,  8,
-      31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6,  11, 5,  10, 9};
-
-  for (auto _ : state) {
-    const int64_t x = data[0];
-    benchmark::DoNotOptimize(x);
-    benchmark::ClobberMemory();
-    int index =
-        MultiplyDeBruijnBitPosition[((uint32_t)((x & -x) * 0x077CB531U)) >> 27];
-    printf("%d\n", index);
-    benchmark::DoNotOptimize(index);
+    }
+    benchmark::DoNotOptimize(elem);
+    benchmark::DoNotOptimize(idx);
     benchmark::ClobberMemory();
   }
 }
+
+static constexpr int32_t scale(int32_t i) {
+  i--;
+  i |= i >> 1;
+  i |= i >> 2;
+  i |= i >> 4;
+  i |= i >> 8;
+  i |= i >> 16;
+  i++;
+  return i;
+}
+
+static void test_div(benchmark::State &state) {
+
+  int32_t v = state.range(0);
+  int32_t h = state.range(1);
+
+  int32_t a = scale(v);
+  int32_t b = scale(h);
+
+  int32_t p = __builtin_ffs(a) - 1;
+  int32_t q = __builtin_ffs(v) - 1;
+  int32_t r = p - q;
+
+  int32_t n = (b - h);
+  int32_t m = std::max(n - a, 0);
+  int32_t o = m >> r;
+
+  printf("v = %d, h = %d, div = %d | a = %d, b = %d, p = %d, q = %d, n = %d, m "
+         "= %d, div = %d, div2 =%d\n",
+         v, h, h / v, a, b, p, q, n, m, (b >> p), o);
+
+  //  for (auto _ : state) {
+  //  }
+}
+
+BENCHMARK(test_div)
+    ->Args({16, 16 * 16})
+    ->Args({16, 16 * 48})
+    ->Args({24, 24 * 16})
+    ->Args({24, 24 * 72})
+    ->Args({48, 48 * 16})
+    ->Args({48 * 8, 48 * 8 * 1000});
 
 BENCHMARK_REGISTER_F(dataFix, bitfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30));
+    ->Args({1, 0, 1 << 6})
+    ->Args({1, 0, (1 << 6) + (1 << 8)})
+    ->Args({1, 0, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({1, 0, (1 << 12) + (1 << 15)})
+    ->Args({1, 0, (1 << 30)});
 
 BENCHMARK_REGISTER_F(dataFix, loopfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30));
+    ->Args({1, 0, 1 << 6})
+    ->Args({1, 0, (1 << 6) + (1 << 8)})
+    ->Args({1, 0, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({1, 0, (1 << 12) + (1 << 15)})
+    ->Args({1, 0, (1 << 30)});
 
 BENCHMARK_REGISTER_F(dataFix, logfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30));
+    ->Args({1, 0, 1 << 6})
+    ->Args({1, 0, (1 << 6) + (1 << 8)})
+    ->Args({1, 0, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({1, 0, (1 << 12) + (1 << 15)})
+    ->Args({1, 0, (1 << 30)});
 
 BENCHMARK_REGISTER_F(dataFix, ffsfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30));
-
-BENCHMARK_REGISTER_F(dataFix, DeBruijnfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30));
+    ->Args({1, 0, 1 << 6})
+    ->Args({1, 0, (1 << 6) + (1 << 8)})
+    ->Args({1, 0, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({1, 0, (1 << 12) + (1 << 15)})
+    ->Args({1, 0, (1 << 30)});
 
 BENCHMARK_REGISTER_F(dataFix, ffsarrayfind)
-    ->ArgPair(1, 1 << 6)
-    ->ArgPair(1, (1 << 6) + (1 << 8))
-    ->ArgPair(1, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(1, (1 << 12) + (1 << 15))
-    ->ArgPair(1, (1 << 30))
-    ->ArgPair(4, 1 << 6)
-    ->ArgPair(4, (1 << 6) + (1 << 8))
-    ->ArgPair(4, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(4, (1 << 12) + (1 << 15))
-    ->ArgPair(4, (1 << 30))
-    ->ArgPair(17, 1 << 6)
-    ->ArgPair(17, (1 << 6) + (1 << 8))
-    ->ArgPair(17, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(17, (1 << 12) + (1 << 15))
-    ->ArgPair(17, (1 << 30))
-    ->ArgPair(57, 1 << 6)
-    ->ArgPair(57, (1 << 6) + (1 << 8))
-    ->ArgPair(57, (1 << 3) + (1 << 6) + (1 << 9))
-    ->ArgPair(57, (1 << 12) + (1 << 15))
-    ->ArgPair(57, (1 << 30));
+    ->Args({1, 0, 1 << 6})
+    ->Args({1, 0, (1 << 6) + (1 << 8)})
+    ->Args({1, 0, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({1, 0, (1 << 12) + (1 << 15)})
+    ->Args({1, 0, (1 << 30)})
+    ->Args({8, 4, 1 << 6})
+    ->Args({8, 4, (1 << 6) + (1 << 8)})
+    ->Args({8, 4, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({8, 4, (1 << 12) + (1 << 15)})
+    ->Args({8, 4, (1 << 30)})
+    ->Args({32, 17, 1 << 6})
+    ->Args({32, 17, (1 << 6) + (1 << 8)})
+    ->Args({32, 17, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({32, 17, (1 << 12) + (1 << 15)})
+    ->Args({32, 17, (1 << 30)})
+    ->Args({64, 57, 1 << 6})
+    ->Args({64, 57, (1 << 6) + (1 << 8)})
+    ->Args({64, 57, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({64, 57, (1 << 12) + (1 << 15)})
+    ->Args({64, 57, (1 << 30)})
+    ->Args({512, 129, 1 << 6})
+    ->Args({512, 129, (1 << 6) + (1 << 8)})
+    ->Args({512, 129, (1 << 3) + (1 << 6) + (1 << 9)})
+    ->Args({512, 129, (1 << 12) + (1 << 15)})
+    ->Args({512, 129, (1 << 30)});
 
 BENCHMARK_MAIN();
