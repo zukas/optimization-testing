@@ -53,7 +53,7 @@ private:
 
 constexpr int size = 10000;
 
-static void baseline(benchmark::State &state) {
+static void baseline_oop(benchmark::State &state) {
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -102,9 +102,9 @@ static void baseline(benchmark::State &state) {
   }
 }
 
-BENCHMARK(baseline);
+BENCHMARK(baseline_oop);
 
-static void parallel_base(benchmark::State &state) {
+static void vector_compiler_generated(benchmark::State &state) {
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -162,13 +162,13 @@ static void parallel_base(benchmark::State &state) {
   }
 }
 
-BENCHMARK(parallel_base);
+BENCHMARK(vector_compiler_generated);
 
 struct vector_data {
   float data[8];
 };
 
-static void parallel_intrinsics_base(benchmark::State &state) {
+static void vecor_intrinsics_unaligned(benchmark::State &state) {
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -240,9 +240,9 @@ static void parallel_intrinsics_base(benchmark::State &state) {
   }
 }
 
-BENCHMARK(parallel_intrinsics_base);
+BENCHMARK(vecor_intrinsics_unaligned);
 
-static void parallel_intrinsics_aligned(benchmark::State &state) {
+static void vecor_intrinsics_32byte_aligned(benchmark::State &state) {
 
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -355,6 +355,6 @@ static void parallel_intrinsics_aligned(benchmark::State &state) {
   free(t3_res);
 }
 
-BENCHMARK(parallel_intrinsics_aligned);
+BENCHMARK(vecor_intrinsics_32byte_aligned);
 
 BENCHMARK_MAIN();
